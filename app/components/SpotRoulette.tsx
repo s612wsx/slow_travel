@@ -152,10 +152,17 @@ export function SpotRoulette() {
                   </div>
                   <div className="roulette-car-track absolute bottom-2 left-0">
                     <span
-                      className="roulette-car-bob inline-block text-3xl"
+                      className="roulette-car-bob inline-flex items-end text-3xl"
                       aria-hidden="true"
                     >
-                      🚐
+                      <span className="mr-0.5 text-base opacity-70">💨</span>
+                      {/* 🚗 emoji 預設朝左，水平翻轉讓車頭朝右（行進方向） */}
+                      <span
+                        className="inline-block"
+                        style={{ transform: "scaleX(-1)" }}
+                      >
+                        🚗
+                      </span>
                     </span>
                   </div>
                 </div>
