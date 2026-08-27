@@ -467,7 +467,7 @@ export default function Home() {
               只要願意用好奇的眼睛，重新看一次身邊的風景。」
             </blockquote>
             <p className="mt-8 text-sm text-cream/70">
-              —— 今天去哪裡編輯室，寫於一個滂沱大雨的午後
+              —— 今天去哪裡編輯室，寫於一個下著小雨的午後
             </p>
           </Parallax>
         </section>
