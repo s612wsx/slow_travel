@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* 自然色調 —— 米白、森林綠、暖橘、淺棕 */
+  --color-cream: #faf6ec;
+  --color-paper: #f3e9d7;
+  --color-sand: #e7d7bd;
+  --color-forest: #2f5d50;
+  --color-forest-deep: #234a3f;
+  --color-sage: #7c9885;
+  --color-ember: #df7a3e;
+  --color-ember-soft: #eda874;
+  --color-clay: #c6a582;
+  --color-bark: #46382b;
+  --color-bark-soft: #6d5c49;
+
+  --font-display: var(--font-fraunces), ui-serif, Georgia, "Songti TC", serif;
+  --font-sans: var(--font-nunito), "PingFang TC", "Noto Sans TC",
+    "Microsoft JhengHei", system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-bark);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background-color: var(--color-ember);
+  color: var(--color-cream);
+}
+
+/* 「我今天去哪裡」modal 的進場動畫 */
+@keyframes spot-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-spot-pop {
+  animation: spot-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-modal-in {
+  animation: modal-in 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-overlay-in {
+  animation: overlay-in 0.25s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spot-pop,
+  .animate-modal-in,
+  .animate-overlay-in {
+    animation: none;
+  }
+}
+
+/* 小遊戲：物品掉落與得分彈出 */
+@keyframes game-fall {
+  from {
+    top: -14%;
+  }
+  to {
+    top: 116%;
+  }
+}
+
+@keyframes game-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -12px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -40px) scale(1);
+  }
 }
