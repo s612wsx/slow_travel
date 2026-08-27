@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { spots, type Spot } from "../lib/spots";
 
+const REVEAL_MS = 1500;
+
 function pickSpot(previous: Spot | null): Spot {
   const pool = previous
     ? spots.filter((s) => s.name !== previous.name)
@@ -10,24 +12,56 @@ function pickSpot(previous: Spot | null): Spot {
   return pool[Math.floor(Math.random() * pool.length)] ?? spots[0];
 }
 
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 export function SpotRoulette() {
   const [open, setOpen] = useState(false);
+  const [phase, setPhase] = useState<"drawing" | "result">("drawing");
   const [current, setCurrent] = useState<Spot | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<number | null>(null);
 
-  const drawNext = useCallback(() => {
-    setCurrent((prev) => pickSpot(prev));
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  // 先抽好結果，但先播小動畫，時間到才揭曉
+  const runDraw = useCallback((previous: Spot | null) => {
+    setCurrent(pickSpot(previous));
+    clearTimer();
+    if (prefersReducedMotion()) {
+      setPhase("result");
+      return;
+    }
+    setPhase("drawing");
+    timerRef.current = window.setTimeout(() => {
+      setPhase("result");
+      timerRef.current = null;
+    }, REVEAL_MS);
   }, []);
 
   const handleOpen = () => {
-    drawNext();
     setOpen(true);
+    runDraw(current);
   };
 
-  const handleClose = () => setOpen(false);
+  const drawAgain = () => runDraw(current);
 
-  // 開啟時：鎖定捲動、Esc 關閉、Tab 焦點鎖在 modal 內、關閉後焦點還給按鈕
+  const handleClose = () => {
+    clearTimer();
+    setOpen(false);
+  };
+
+  // 開啟時：鎖捲動、Esc 關閉、Tab 焦點鎖在 modal 內、關閉後焦點還給按鈕
   useEffect(() => {
     if (!open) return;
 
@@ -60,6 +94,7 @@ export function SpotRoulette() {
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
+      clearTimer();
       triggerRef.current?.focus();
     };
   }, [open]);
@@ -88,57 +123,94 @@ export function SpotRoulette() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="spot-roulette-name"
+            aria-busy={phase === "drawing"}
             tabIndex={-1}
             onClick={(e) => e.stopPropagation()}
             className="animate-modal-in relative w-full max-w-md overflow-hidden rounded-2xl border border-bark/10 bg-cream shadow-2xl outline-none"
           >
             <div className="h-1.5 w-full bg-gradient-to-r from-forest via-sage to-ember" />
 
-            <div className="p-6 sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-clay">
-                今天的提案
-              </p>
-
-              <div key={current.name} className="animate-spot-pop">
-                <h2
-                  id="spot-roulette-name"
-                  className="mt-3 font-display text-3xl font-semibold text-forest"
-                >
-                  {current.name}
-                </h2>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="rounded-full bg-forest px-3 py-1 text-xs font-semibold text-cream">
-                    {current.city}
+            {phase === "drawing" ? (
+              <div className="px-6 py-9 sm:px-8">
+                <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-clay">
+                  <span className="roulette-dice mr-2" aria-hidden="true">
+                    🎲
                   </span>
-                  <span className="rounded-full border border-clay/50 bg-paper px-3 py-1 text-xs font-semibold text-bark-soft">
-                    {current.type}
-                  </span>
+                  正在為你找路
+                </p>
+
+                <div className="relative mt-6 h-24 overflow-hidden rounded-xl border border-bark/10 bg-paper/60">
+                  <div className="absolute inset-x-0 bottom-5 border-t-2 border-dashed border-clay/70" />
+                  <div className="roulette-scenery absolute bottom-6 left-3 flex gap-9 text-2xl">
+                    {["🌲", "⛰️", "🏖️", "🏙️", "🏝️", "🌾", "🌲", "⛰️", "🏖️", "🏙️"].map(
+                      (s, i) => (
+                        <span key={i} aria-hidden="true">
+                          {s}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                  <div className="roulette-car-track absolute bottom-2 left-0">
+                    <span
+                      className="roulette-car-bob inline-block text-3xl"
+                      aria-hidden="true"
+                    >
+                      🚐
+                    </span>
+                  </div>
                 </div>
 
-                <p className="mt-4 text-sm leading-7 text-bark-soft">
-                  {current.reason}
+                <p className="mt-6 text-center text-sm text-bark-soft">
+                  油門催下去，馬上就到⋯⋯
                 </p>
               </div>
+            ) : (
+              <div className="p-6 sm:p-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-clay">
+                  今天的提案
+                </p>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={drawNext}
-                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ember px-5 text-sm font-semibold text-cream transition-colors hover:bg-[#c96a32] sm:flex-1"
-                >
-                  <span aria-hidden="true">🎲</span>
-                  再抽一次
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="inline-flex h-11 w-full items-center justify-center rounded-full border border-forest/30 px-5 text-sm font-semibold text-forest transition-colors hover:bg-paper sm:w-auto"
-                >
-                  關閉
-                </button>
+                <div key={current.name} className="animate-spot-pop">
+                  <h2
+                    id="spot-roulette-name"
+                    className="mt-3 font-display text-3xl font-semibold text-forest"
+                  >
+                    {current.name}
+                  </h2>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-forest px-3 py-1 text-xs font-semibold text-cream">
+                      {current.city}
+                    </span>
+                    <span className="rounded-full border border-clay/50 bg-paper px-3 py-1 text-xs font-semibold text-bark-soft">
+                      {current.type}
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-sm leading-7 text-bark-soft">
+                    {current.reason}
+                  </p>
+                </div>
+
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={drawAgain}
+                    className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ember px-5 text-sm font-semibold text-cream transition-colors hover:bg-[#c96a32] sm:flex-1"
+                  >
+                    <span aria-hidden="true">🎲</span>
+                    再抽一次
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="inline-flex h-11 w-full items-center justify-center rounded-full border border-forest/30 px-5 text-sm font-semibold text-forest transition-colors hover:bg-paper sm:w-auto"
+                  >
+                    關閉
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

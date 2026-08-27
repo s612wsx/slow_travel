@@ -86,6 +86,69 @@ body {
   }
 }
 
+/* 「我今天去哪裡」抽選前的小動畫（小巴士跑過、風景掠過、骰子轉） */
+@keyframes roulette-drive {
+  0% {
+    transform: translateX(-30%);
+  }
+  80% {
+    transform: translateX(88%);
+  }
+  100% {
+    transform: translateX(80%);
+  }
+}
+
+@keyframes roulette-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes roulette-scenery {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-58%);
+  }
+}
+
+@keyframes roulette-dice {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.roulette-car-track {
+  animation: roulette-drive 1.5s cubic-bezier(0.33, 0, 0.2, 1) both;
+}
+
+.roulette-car-bob {
+  animation: roulette-bob 0.32s ease-in-out infinite alternate;
+}
+
+.roulette-scenery {
+  animation: roulette-scenery 1.5s linear both;
+}
+
+.roulette-dice {
+  display: inline-block;
+  animation: roulette-dice 0.55s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roulette-car-track,
+  .roulette-car-bob,
+  .roulette-scenery,
+  .roulette-dice {
+    animation: none;
+  }
+}
+
 /* 小遊戲：物品掉落與得分彈出 */
 @keyframes game-fall {
   from {
