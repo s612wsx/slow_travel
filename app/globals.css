@@ -34,6 +34,20 @@ body {
   color: var(--color-cream);
 }
 
+/*
+ * iOS WebKit（含 Safari、LINE / FB 等 App 內建瀏覽器）會在聚焦
+ * font-size < 16px 的表單控制項時自動放大整個畫面，且失焦後不會縮回。
+ * 手機尺寸下把所有輸入元件的基準字級拉到 16px 作為保險；
+ * 個別元件若要更大的字，仍可用 Tailwind class 覆蓋。
+ */
+@media (max-width: 639.98px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* 「我今天去哪裡」modal 的進場動畫 */
 @keyframes spot-pop {
   from {

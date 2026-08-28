@@ -197,6 +197,7 @@ export function TravellerWelcome() {
               <label htmlFor="traveller-name-input" className="sr-only">
                 你的稱呼
               </label>
+              {/* text-base（16px）在手機上避免 iOS WebKit 聚焦輸入框時自動放大畫面 */}
               <input
                 id="traveller-name-input"
                 ref={inputRef}
@@ -204,7 +205,7 @@ export function TravellerWelcome() {
                 onChange={(e) => setDraft(e.target.value)}
                 maxLength={20}
                 placeholder="例如：小綠、阿海、山風……"
-                className="mt-5 h-12 w-full rounded-full border border-clay/60 bg-white px-5 text-sm text-bark outline-none placeholder:text-clay focus:border-forest"
+                className="mt-5 h-12 w-full rounded-full border border-clay/60 bg-white px-5 text-base text-bark outline-none placeholder:text-clay focus:border-forest sm:text-sm"
               />
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
